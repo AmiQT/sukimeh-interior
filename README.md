@@ -1,6 +1,6 @@
 # Sukimeh AI Interior Designer
 
-**Chin Hin Group — AI Hackathon 2026**
+**Chin Hin Group - AI Hackathon 2026**
 
 AI-powered interior design tool that analyzes floor plans, generates smart furniture layouts, and provides product recommendations with one-click purchasing.
 
@@ -105,13 +105,13 @@ The app will be available at `http://localhost:3000`.
 
 ## Screens
 
-### Screen 1 — Upload
+### Screen 1 - Upload
 Upload a floor plan image or PDF. The AI analyzes room boundaries and zones.
 
-### Screen 2 — AI Processing
+### Screen 2 - AI Processing
 Animated step-by-step processing view while the Foundry API analyzes the image.
 
-### Screen 3 — 2D Layout Canvas
+### Screen 3 - 2D Layout Canvas
 Interactive Konva.js canvas with:
 - Drag-and-drop furniture placement
 - Smart annotation badges (WiFi, Airflow, Traffic Flow)
@@ -119,7 +119,7 @@ Interactive Konva.js canvas with:
 - Score badge
 - Smart Optimization sidebar
 
-### Screen 4 — Shop the Look
+### Screen 4 - Shop the Look
 Product listing with pricing, bundle discounts, add-to-cart, and share proposal link.
 
 ### Shared Proposal
