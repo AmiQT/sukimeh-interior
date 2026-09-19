@@ -7,8 +7,15 @@
     "original_price": 1599,
     "room": "kitchen",
     "placement_role": "hood",
-    "dimensions": { "width": 90, "depth": 50, "height": 15 },
-    "smart_features": ["wifi", "auto-clean"],
+    "dimensions": {
+      "width": 90,
+      "depth": 50,
+      "height": 15
+    },
+    "smart_features": [
+      "wifi",
+      "auto-clean"
+    ],
     "thumbnail": "/products/dapur-hood-x5.jpg"
   },
   {
@@ -19,8 +26,14 @@
     "original_price": 1099,
     "room": "kitchen",
     "placement_role": "hob",
-    "dimensions": { "width": 76, "depth": 52, "height": 5 },
-    "smart_features": ["flame-failure"],
+    "dimensions": {
+      "width": 76,
+      "depth": 52,
+      "height": 5
+    },
+    "smart_features": [
+      "flame-failure"
+    ],
     "thumbnail": "/products/dapur-hob-g4.jpg"
   },
   {
@@ -31,8 +44,15 @@
     "original_price": 2999,
     "room": "kitchen",
     "placement_role": "fridge",
-    "dimensions": { "width": 91, "depth": 72, "height": 178 },
-    "smart_features": ["inverter", "smart-temp"],
+    "dimensions": {
+      "width": 91,
+      "depth": 72,
+      "height": 178
+    },
+    "smart_features": [
+      "inverter",
+      "smart-temp"
+    ],
     "thumbnail": "/products/dapur-fridge-s2.jpg"
   },
   {
@@ -43,8 +63,15 @@
     "original_price": 1899,
     "room": "kitchen",
     "placement_role": "dishwasher",
-    "dimensions": { "width": 60, "depth": 55, "height": 85 },
-    "smart_features": ["wifi", "eco-mode"],
+    "dimensions": {
+      "width": 60,
+      "depth": 55,
+      "height": 85
+    },
+    "smart_features": [
+      "wifi",
+      "eco-mode"
+    ],
     "thumbnail": "/products/dapur-dw-a3.jpg"
   },
   {
@@ -55,8 +82,16 @@
     "original_price": 449,
     "room": "living_room",
     "placement_role": "wifi_router",
-    "dimensions": { "width": 22, "depth": 16, "height": 6 },
-    "smart_features": ["wifi-6e", "mesh-ready", "ai-optimize"],
+    "dimensions": {
+      "width": 22,
+      "depth": 16,
+      "height": 6
+    },
+    "smart_features": [
+      "wifi-6e",
+      "mesh-ready",
+      "ai-optimize"
+    ],
     "thumbnail": "/products/ruma-wifi-01.jpg"
   },
   {
@@ -67,8 +102,15 @@
     "original_price": 249,
     "room": "bedroom",
     "placement_role": "mesh_extender",
-    "dimensions": { "width": 10, "depth": 10, "height": 8 },
-    "smart_features": ["wifi-6e", "plug-play"],
+    "dimensions": {
+      "width": 10,
+      "depth": 10,
+      "height": 8
+    },
+    "smart_features": [
+      "wifi-6e",
+      "plug-play"
+    ],
     "thumbnail": "/products/ruma-mesh-01.jpg"
   },
   {
@@ -79,7 +121,11 @@
     "original_price": 2399,
     "room": "living_room",
     "placement_role": "sofa",
-    "dimensions": { "width": 280, "depth": 160, "height": 85 },
+    "dimensions": {
+      "width": 280,
+      "depth": 160,
+      "height": 85
+    },
     "smart_features": [],
     "thumbnail": "/products/ruma-sofa-01.jpg"
   },
@@ -91,8 +137,16 @@
     "original_price": 2699,
     "room": "living_room",
     "placement_role": "tv",
-    "dimensions": { "width": 145, "depth": 8, "height": 83 },
-    "smart_features": ["4k", "smart-os", "voice-control"],
+    "dimensions": {
+      "width": 145,
+      "depth": 8,
+      "height": 83
+    },
+    "smart_features": [
+      "4k",
+      "smart-os",
+      "voice-control"
+    ],
     "thumbnail": "/products/ruma-tv-01.jpg"
   },
   {
@@ -103,7 +157,11 @@
     "original_price": 749,
     "room": "living_room",
     "placement_role": "coffee_table",
-    "dimensions": { "width": 120, "depth": 60, "height": 45 },
+    "dimensions": {
+      "width": 120,
+      "depth": 60,
+      "height": 45
+    },
     "smart_features": [],
     "thumbnail": "/products/ruma-table-01.jpg"
   },
@@ -115,7 +173,11 @@
     "original_price": 1899,
     "room": "bedroom",
     "placement_role": "bed",
-    "dimensions": { "width": 183, "depth": 203, "height": 40 },
+    "dimensions": {
+      "width": 183,
+      "depth": 203,
+      "height": 40
+    },
     "smart_features": [],
     "thumbnail": "/products/ruma-bed-01.jpg"
   },
@@ -127,8 +189,14 @@
     "original_price": 2199,
     "room": "bedroom",
     "placement_role": "wardrobe",
-    "dimensions": { "width": 200, "depth": 60, "height": 220 },
-    "smart_features": ["led-interior"],
+    "dimensions": {
+      "width": 200,
+      "depth": 60,
+      "height": 220
+    },
+    "smart_features": [
+      "led-interior"
+    ],
     "thumbnail": "/products/ruma-wardrobe-01.jpg"
   },
   {
@@ -139,8 +207,16 @@
     "original_price": 199,
     "room": "bedroom",
     "placement_role": "smart_sensor",
-    "dimensions": { "width": 8, "depth": 8, "height": 3 },
-    "smart_features": ["motion", "temperature", "humidity"],
+    "dimensions": {
+      "width": 8,
+      "depth": 8,
+      "height": 3
+    },
+    "smart_features": [
+      "motion",
+      "temperature",
+      "humidity"
+    ],
     "thumbnail": "/products/ruma-sensor-01.jpg"
   },
   {
@@ -151,8 +227,16 @@
     "original_price": 549,
     "room": "living_room",
     "placement_role": "ceiling_fan",
-    "dimensions": { "width": 120, "depth": 120, "height": 30 },
-    "smart_features": ["wifi", "dc-motor", "breeze-mode"],
+    "dimensions": {
+      "width": 120,
+      "depth": 120,
+      "height": 30
+    },
+    "smart_features": [
+      "wifi",
+      "dc-motor",
+      "breeze-mode"
+    ],
     "thumbnail": "/products/ruma-fan-01.jpg"
   }
 ]

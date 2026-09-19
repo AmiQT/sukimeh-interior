@@ -67,8 +67,8 @@ def sample_layout_response(sample_rooms) -> LayoutResponse:
         rooms=sample_rooms,
         furniture_placements=[
             FurniturePlacement(
-                product_id="ELB-HOOD-X5",
-                name="Elba Smart Hood X5",
+                product_id="DAPUR-HOOD-01",
+                name="Dapur Works Smart Hood X5",
                 room="kitchen",
                 x_percent=65,
                 y_percent=15,
@@ -84,11 +84,11 @@ def sample_layout_response(sample_rooms) -> LayoutResponse:
         bundle=Bundle(
             products=[
                 BundleProduct(
-                    id="ELB-HOOD-X5",
-                    name="Elba Smart Hood X5",
+                    id="DAPUR-HOOD-01",
+                    name="Dapur Works Smart Hood X5",
                     price=1299,
                     original_price=1599,
-                    thumbnail="/products/elba-hood-x5.jpg",
+                    thumbnail="/products/dapur-hood-x5.jpg",
                 )
             ],
             total_original=1599,

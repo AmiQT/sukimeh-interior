@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import ProductArt from "@/components/ProductArt";
+import { useAppStore } from "@/lib/store";
 import { BundleProduct, Bundle } from "@/lib/store";
 import { ShoppingCart, Package, Tag, Check, Plus } from "lucide-react";
 
@@ -17,29 +18,31 @@ export default function ShopBundle({
   onPurchaseAll,
   onShare,
 }: ShopBundleProps) {
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const cart = useAppStore((s) => s.cart);
+  const addedIds = new Set(cart.map((item) => item.id));
   const savings = bundle.total_original - bundle.total_discounted;
-  const savingsPercent = Math.round((savings / bundle.total_original) * 100);
+  const savingsPercent = bundle.total_original > 0 ? Math.round((savings / bundle.total_original) * 100) : 0;
 
   const handleAdd = (product: BundleProduct) => {
     onAddToCart(product);
-    setAddedIds((prev) => new Set(prev).add(product.id));
+
   };
 
   const handlePurchaseAllClick = () => {
     // Mark all as added visually
-    setAddedIds(new Set(bundle.products.map((p) => p.id)));
+
     onPurchaseAll();
   };
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-navy-400 bg-navy-50 rounded-xl p-4">Katalog rekaan untuk demo. Harga bukan tawaran jualan; tiada bayaran atau penghantaran.</p>
       {/* Products list */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-xl text-navy-500 flex items-center gap-2">
-            <Package className="w-5 h-5 text-accent" />
-            Included in this Design
+            <span className="text-accent">📦</span>
+            Pilihan untuk ruang anda
           </h3>
           <span className="text-xs text-gray-400">
             {addedIds.size}/{bundle.products.length} dalam troli
@@ -60,14 +63,14 @@ export default function ShopBundle({
               >
                 {/* Product icon */}
                 <div
-                  className={`w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  className={`w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 text-3xl ${
                     isAdded ? "bg-green-100" : "bg-navy-50"
                   }`}
                 >
                   {isAdded ? (
                     <Check className="w-7 h-7 text-green-500" />
                   ) : (
-                    <Package className="w-6 h-6 text-navy-300" />
+                    <ProductArt sku={product.sku || product.id} />
                   )}
                 </div>
 
@@ -150,7 +153,7 @@ export default function ShopBundle({
             className="flex-1 bg-accent hover:bg-accent-500 text-white font-semibold py-3 px-6 rounded-btn transition-colors flex items-center justify-center gap-2 shadow-card"
           >
             <ShoppingCart className="w-4 h-4" />
-            Beli Pakej Penuh →
+            Tambah Pakej Demo →
           </button>
           <button
             onClick={onShare}

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Union
 from enum import Enum
 
 
@@ -101,12 +101,12 @@ class GenerateLayoutRequest(BaseModel):
 
 
 class ProposalCreate(BaseModel):
-    layout: LayoutResponse
+    layout: Union[LayoutResponse, dict]
     image_url: Optional[str] = None
 
 
 class ProposalResponse(BaseModel):
     id: str
-    layout: LayoutResponse
+    layout: Union[LayoutResponse, dict]
     image_url: Optional[str] = None
     created_at: str

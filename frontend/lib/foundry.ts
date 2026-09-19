@@ -1,31 +1,19 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-export async function analyzeFloorplan(file: File) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`/api/analyze-floorplan`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to analyze floorplan");
-  }
-
-  return response.json();
-}
-
-export async function generateLayout(rooms: any[], imagePath?: string) {
-  const response = await fetch(`/api/generate-layout`, {
+export async function suggestFurniture(floorPlan: {
+  walls: { id: string; x1: number; y1: number; x2: number; y2: number }[];
+  roomLabels: { id: string; x: number; y: number; type: string }[];
+  canvas_width: number;
+  canvas_height: number;
+  style_preset?: string;
+  style_prompt?: string;
+}) {
+  const response = await fetch("/api/suggest-furniture", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rooms, image_path: imagePath }),
+    body: JSON.stringify(floorPlan),
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate layout");
+    throw new Error("Failed to get furniture suggestions");
   }
 
   return response.json();

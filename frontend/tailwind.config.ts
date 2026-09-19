@@ -38,8 +38,8 @@ const config: Config = {
         background: "#F8F9FF",
       },
       fontFamily: {
-        display: ["DM Serif Display", "serif"],
-        body: ["DM Sans", "sans-serif"],
+        display: ["Georgia", "serif"],
+        body: ["Arial", "sans-serif"],
       },
       borderRadius: {
         card: "12px",

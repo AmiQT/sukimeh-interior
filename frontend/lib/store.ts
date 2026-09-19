@@ -1,24 +1,55 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface RoomAnalysis {
-  type: string;
-  confidence: number;
-  approximate_size: string;
-  features: string[];
+// ── Floor plan drawing types ──────────────────────────────────────────────────
+export interface Wall {
+  id: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
 }
 
-export interface FurniturePlacement {
+export interface DoorElement {
+  id: string;
+  x: number;
+  y: number;
+  rotation: number;
+}
+
+export interface WindowElement {
+  id: string;
+  x: number;
+  y: number;
+  rotation: number;
+}
+
+export interface RoomLabel {
+  id: string;
+  x: number;
+  y: number;
+  type: string;
+}
+
+export interface CanvasFurniture {
+  id: string;
   product_id: string;
   name: string;
-  room: string;
-  x_percent: number;
-  y_percent: number;
-  rotation: number;
-  annotation: string;
   icon: string;
+  x: number;
+  y: number;
+  annotation?: string;
 }
 
+export interface FloorPlan {
+  walls: Wall[];
+  doors: DoorElement[];
+  windows: WindowElement[];
+  roomLabels: RoomLabel[];
+  furniture: CanvasFurniture[];
+}
+
+// ── AI result / shop types ────────────────────────────────────────────────────
 export interface SmartOptimization {
   type: string;
   title: string;
@@ -43,8 +74,6 @@ export interface Bundle {
 export interface LayoutData {
   layout_id: string;
   score: number;
-  rooms: RoomAnalysis[];
-  furniture_placements: FurniturePlacement[];
   smart_optimizations: SmartOptimization[];
   bundle: Bundle;
 }
@@ -53,52 +82,54 @@ export interface CartItem extends BundleProduct {
   quantity: number;
 }
 
+// ── Store ─────────────────────────────────────────────────────────────────────
 export interface AppState {
-  // Upload state
-  uploadedFile: File | null;
-  uploadedFileUrl: string | null;
-  imagePath: string | null;
-
-  // Analysis state
-  analysis: {
-    rooms: RoomAnalysis[];
-    overall_layout: string;
-    image_quality: string;
-  } | null;
-
-  // Layout state
+  floorPlan: FloorPlan;
   layoutData: LayoutData | null;
-  selectedRoom: string;
-  selectedFurniture: string | null;
-
-  // Cart state
   cart: CartItem[];
 
-  // Actions
-  setUploadedFile: (file: File | null, url: string | null) => void;
-  setImagePath: (path: string | null) => void;
-  setAnalysis: (analysis: any) => void;
+  // Floor plan actions
+  addWall: (wall: Wall) => void;
+  removeWall: (id: string) => void;
+  addDoor: (door: DoorElement) => void;
+  removeDoor: (id: string) => void;
+  updateDoorRotation: (id: string, rotation: number) => void;
+  addWindow: (win: WindowElement) => void;
+  removeWindow: (id: string) => void;
+  updateWindowRotation: (id: string, rotation: number) => void;
+  addRoomLabel: (label: RoomLabel) => void;
+  removeRoomLabel: (id: string) => void;
+  addFurniture: (item: CanvasFurniture) => void;
+  removeFurniture: (id: string) => void;
+  updateFurniturePosition: (id: string, x: number, y: number) => void;
+  setFloorPlan: (plan: FloorPlan) => void;
+  clearFloorPlan: () => void;
+
+  // AI result actions
   setLayoutData: (data: LayoutData | null) => void;
-  setSelectedRoom: (room: string) => void;
-  setSelectedFurniture: (id: string | null) => void;
-  updateFurniturePosition: (productId: string, x: number, y: number) => void;
+
+  // Cart actions
   addToCart: (product: BundleProduct) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+
   reset: () => void;
 }
 
+const emptyFloorPlan: FloorPlan = {
+  walls: [],
+  doors: [],
+  windows: [],
+  roomLabels: [],
+  furniture: [],
+};
+
 const initialState = {
-  uploadedFile: null,
-  uploadedFileUrl: null,
-  imagePath: null,
-  analysis: null,
+  floorPlan: emptyFloorPlan,
   layoutData: null,
-  selectedRoom: "all",
-  selectedFurniture: null,
   cart: [] as CartItem[],
 };
 
@@ -107,87 +138,91 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       ...initialState,
 
-      setUploadedFile: (file, url) =>
-        set({ uploadedFile: file, uploadedFileUrl: url }),
+      addWall: (wall) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, walls: [...s.floorPlan.walls, wall] } })),
+      removeWall: (id) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, walls: s.floorPlan.walls.filter((w) => w.id !== id) } })),
 
-      setImagePath: (path) => set({ imagePath: path }),
+      addDoor: (door) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, doors: [...s.floorPlan.doors, door] } })),
+      removeDoor: (id) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, doors: s.floorPlan.doors.filter((d) => d.id !== id) } })),
+      updateDoorRotation: (id, rotation) =>
+        set((s) => ({
+          floorPlan: {
+            ...s.floorPlan,
+            doors: s.floorPlan.doors.map((d) => (d.id === id ? { ...d, rotation } : d)),
+          },
+        })),
 
-      setAnalysis: (analysis) => set({ analysis }),
+      addWindow: (win) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, windows: [...s.floorPlan.windows, win] } })),
+      removeWindow: (id) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, windows: s.floorPlan.windows.filter((w) => w.id !== id) } })),
+      updateWindowRotation: (id, rotation) =>
+        set((s) => ({
+          floorPlan: {
+            ...s.floorPlan,
+            windows: s.floorPlan.windows.map((w) => (w.id === id ? { ...w, rotation } : w)),
+          },
+        })),
+
+      addRoomLabel: (label) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, roomLabels: [...s.floorPlan.roomLabels, label] } })),
+      removeRoomLabel: (id) =>
+        set((s) => ({
+          floorPlan: { ...s.floorPlan, roomLabels: s.floorPlan.roomLabels.filter((l) => l.id !== id) },
+        })),
+
+      addFurniture: (item) =>
+        set((s) => ({ floorPlan: { ...s.floorPlan, furniture: [...s.floorPlan.furniture, item] } })),
+      removeFurniture: (id) =>
+        set((s) => ({
+          floorPlan: { ...s.floorPlan, furniture: s.floorPlan.furniture.filter((f) => f.id !== id) },
+        })),
+      updateFurniturePosition: (id, x, y) =>
+        set((s) => ({
+          floorPlan: {
+            ...s.floorPlan,
+            furniture: s.floorPlan.furniture.map((f) => (f.id === id ? { ...f, x, y } : f)),
+          },
+        })),
+
+      setFloorPlan: (plan) => set({ floorPlan: plan }),
+      clearFloorPlan: () => set({ floorPlan: emptyFloorPlan, layoutData: null }),
 
       setLayoutData: (data) => set({ layoutData: data }),
-
-      setSelectedRoom: (room) => set({ selectedRoom: room }),
-
-      setSelectedFurniture: (id) => set({ selectedFurniture: id }),
-
-      updateFurniturePosition: (productId, x, y) => {
-        const state = get();
-        if (!state.layoutData) return;
-        const placements = state.layoutData.furniture_placements.map((p) =>
-          p.product_id === productId
-            ? { ...p, x_percent: x, y_percent: y }
-            : p
-        );
-        set({
-          layoutData: {
-            ...state.layoutData,
-            furniture_placements: placements,
-          },
-        });
-      },
 
       addToCart: (product) => {
         const state = get();
         const existing = state.cart.find((i) => i.id === product.id);
         if (existing) {
-          set({
-            cart: state.cart.map((i) =>
-              i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-            ),
-          });
+          set({ cart: state.cart.map((i) => (i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i)) });
         } else {
           set({ cart: [...state.cart, { ...product, quantity: 1 }] });
         }
       },
-
-      removeFromCart: (productId) => {
-        set({ cart: get().cart.filter((i) => i.id !== productId) });
-      },
-
+      removeFromCart: (productId) => set({ cart: get().cart.filter((i) => i.id !== productId) }),
       updateCartQuantity: (productId, quantity) => {
         if (quantity < 1) {
           set({ cart: get().cart.filter((i) => i.id !== productId) });
         } else {
-          set({
-            cart: get().cart.map((i) =>
-              i.id === productId ? { ...i, quantity } : i
-            ),
-          });
+          set({ cart: get().cart.map((i) => (i.id === productId ? { ...i, quantity } : i)) });
         }
       },
-
       clearCart: () => set({ cart: [] }),
-
-      getCartTotal: () =>
-        get().cart.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        ),
-
-      getCartCount: () =>
-        get().cart.reduce((sum, item) => sum + item.quantity, 0),
+      getCartTotal: () => get().cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      getCartCount: () => get().cart.reduce((sum, item) => sum + item.quantity, 0),
 
       reset: () => set(initialState),
     }),
     {
-      name: "sukimeh-store",
-      storage: createJSONStorage(() => sessionStorage),
+      name: "ruma-store",
+      skipHydration: true,
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        uploadedFileUrl: state.uploadedFileUrl,
-        imagePath: state.imagePath,
-        analysis: state.analysis,
+        floorPlan: state.floorPlan,
         layoutData: state.layoutData,
-        selectedRoom: state.selectedRoom,
         cart: state.cart,
       }),
     }

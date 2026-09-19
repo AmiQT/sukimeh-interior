@@ -36,9 +36,9 @@ class TestFilterProducts:
         assert all(p.room == "kitchen" for p in kitchen)
 
     def test_get_product_by_id_found(self):
-        product = get_product_by_id("ELB-HOOD-X5")
+        product = get_product_by_id("DAPUR-HOOD-01")
         assert product is not None
-        assert product.name == "Elba Smart Hood X5"
+        assert product.name == "Dapur Works Smart Hood X5"
         assert product.price == 1299
 
     def test_get_product_by_id_not_found(self):

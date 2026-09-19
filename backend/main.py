@@ -1,38 +1,34 @@
 import logging
-from pathlib import Path
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from routers import analyze, layout, proposal
+from routers import proposal, suggest, analyze, layout
 
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(
-    title="Sukimeh AI Interior Designer API",
+    title="Ruma Studio API",
     version="1.0.0",
-    description="Backend API for Chin Hin Group AI Interior Design tool",
+    description="Backend API for Ruma Studio AI Interior Design tool",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-uploads_dir = Path(__file__).parent / "uploads"
-uploads_dir.mkdir(exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
-
 app.include_router(analyze.router, prefix="/api", tags=["analyze"])
 app.include_router(layout.router, prefix="/api", tags=["layout"])
 app.include_router(proposal.router, prefix="/api", tags=["proposal"])
+app.include_router(suggest.router, prefix="/api", tags=["suggest"])
 
 
 @app.get("/")
 async def root():
-    return {"message": "Sukimeh AI Interior Designer API", "status": "running"}
+    return {"message": "Ruma Studio API", "status": "running"}
 
 
 @app.get("/health")

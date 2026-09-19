@@ -12,6 +12,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { toast } from "sonner";
+import PlanPreview from "@/components/PlanPreview";
 import ShopBundle from "@/components/ShopBundle";
 import ScoreCard from "@/components/ScoreCard";
 import CartDrawer from "@/components/CartDrawer";
@@ -23,8 +24,7 @@ export default function ShopPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const {
     layoutData,
-    uploadedFileUrl,
-    imagePath,
+    floorPlan,
     addToCart,
     getCartCount,
     getCartTotal,
@@ -37,12 +37,6 @@ export default function ShopPage() {
   }, [layoutData, router]);
 
   if (!layoutData) return null;
-
-  const imageUrl =
-    uploadedFileUrl ||
-    (imagePath
-      ? `/uploads${imagePath.replace("/uploads", "")}`
-      : null);
 
   const cartCount = getCartCount();
   const cartTotal = getCartTotal();
@@ -59,7 +53,8 @@ export default function ShopPage() {
   };
 
   const handlePurchaseAll = () => {
-    layoutData!.bundle.products.forEach((p) => addToCart(p));
+    const existing = new Set(useAppStore.getState().cart.map((p) => p.id));
+    layoutData!.bundle.products.filter((p) => !existing.has(p.id)).forEach((p) => addToCart(p));
     toast.success("Semua item ditambah ke troli!", {
       description: `${layoutData!.bundle.products.length} item — RM ${layoutData!.bundle.total_discounted.toLocaleString()}`,
       action: {
@@ -71,7 +66,7 @@ export default function ShopPage() {
 
   const handleShare = async () => {
     try {
-      const result = await createProposal(layoutData, imageUrl ?? undefined);
+      const result = await createProposal({ ...layoutData, floorPlan: useAppStore.getState().floorPlan }, undefined);
       const proposalUrl = `${window.location.origin}/proposal/${result.id}`;
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(proposalUrl);
@@ -97,9 +92,9 @@ export default function ShopPage() {
   };
 
   const tags = [
-    { label: "100% Coverage", icon: Shield },
-    { label: "Airflow Optimized", icon: Wind },
-    { label: "Traffic Flow Clear", icon: Footprints },
+    { label: "Ilustrasi WiFi", icon: Shield },
+    { label: "Idea pengudaraan", icon: Wind },
+    { label: "Cadangan laluan", icon: Footprints },
   ];
 
   return (
@@ -116,7 +111,7 @@ export default function ShopPage() {
             </button>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-accent" />
-              <h1 className="text-base font-display">Shop the Look</h1>
+              <h1 className="text-base font-display">Katalog demo</h1>
             </div>
           </div>
           {/* Cart indicator */}
@@ -137,32 +132,23 @@ export default function ShopPage() {
         {/* Hero section */}
         <div className="bg-dark rounded-card overflow-hidden shadow-card mb-8">
           <div className="flex flex-col md:flex-row">
-            {/* Room image */}
+            {/* Illustration */}
             <div className="md:w-1/2">
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt="Room layout"
-                  className="w-full h-64 md:h-80 object-contain bg-navy-800"
-                />
-              ) : (
-                <div className="w-full h-64 md:h-80 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center">
-                  <span className="text-4xl">🏠</span>
-                </div>
-              )}
+              <div className="w-full h-64 md:h-80 bg-gradient-to-br from-navy-700 to-navy-900 flex items-center justify-center">
+                <PlanPreview plan={floorPlan} />
+              </div>
             </div>
 
             {/* Room info */}
             <div className="md:w-1/2 p-6 flex flex-col justify-center">
               <div className="flex items-center gap-4 mb-4">
-                <ScoreCard score={layoutData.score} />
+                {!layoutData.layout_id.startsWith("manual-") && <ScoreCard score={layoutData.score} />}
                 <div>
                   <h2 className="text-2xl font-display text-white">
-                    Your AI-Designed Space
+                    Pilihan untuk ruang anda
                   </h2>
                   <p className="text-navy-200 text-sm mt-1">
-                    {layoutData.rooms.length} rooms •{" "}
-                    {layoutData.furniture_placements.length} items placed
+                    {layoutData.bundle.products.length} perabot dipilih
                   </p>
                 </div>
               </div>
@@ -184,10 +170,10 @@ export default function ShopPage() {
         </div>
 
         {/* AI Intelligence card */}
-        <div className="bg-white rounded-card p-6 border border-navy-100 shadow-sm mb-8">
+        {layoutData.smart_optimizations.length > 0 && <div className="bg-white rounded-card p-6 border border-navy-100 shadow-sm mb-8">
           <h3 className="font-display text-lg text-navy-500 flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-accent" />
-            AI Layout Intelligence
+            Nota susun atur
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {layoutData.smart_optimizations.map((opt, i) => (
@@ -203,6 +189,8 @@ export default function ShopPage() {
             ))}
           </div>
         </div>
+
+        }
 
         {/* Shop bundle */}
         <ShopBundle

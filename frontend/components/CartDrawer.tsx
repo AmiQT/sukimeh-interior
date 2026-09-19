@@ -1,4 +1,5 @@
 "use client";
+import { useDialog } from "@/lib/useDialog";
 
 import { useRouter } from "next/navigation";
 import { X, Trash2, Plus, Minus, ShoppingBag, Package } from "lucide-react";
@@ -27,6 +28,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     router.push("/checkout");
   };
 
+  const dialogRef = useDialog(isOpen, onClose);
+
+  if (!isOpen) return null;
+
   return (
     <>
       {/* Backdrop */}
@@ -38,7 +43,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       />
 
       {/* Drawer */}
-      <div
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Troli demo"
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
@@ -53,6 +58,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
           </div>
           <button
+            aria-label="Tutup troli"
             onClick={onClose}
             className="p-2 hover:bg-navy-600 rounded-full transition-colors"
           >
@@ -155,7 +161,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               className="w-full bg-accent hover:bg-accent-500 text-white font-semibold py-3.5 rounded-btn transition-colors flex items-center justify-center gap-2 shadow-card"
             >
               <ShoppingBag className="w-4 h-4" />
-              Teruskan ke Checkout →
+              Teruskan ke Ringkasan demo →
             </button>
             <button
               onClick={() => {

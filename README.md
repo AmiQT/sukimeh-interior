@@ -1,169 +1,99 @@
-# Sukimeh AI Interior Designer
+# Ruma Studio
 
-**Chin Hin Group - AI Hackathon 2026**
+An open-source, Malay-first room planner. Draw a floor plan, arrange furniture, inspect an isometric view, and share a design proposal.
 
-AI-powered interior design tool that analyzes floor plans, generates smart furniture layouts, and provides product recommendations with one-click purchasing.
+**Ruma Studio**, **Ruma Living**, and **Dapur Works** are fictional labels used by this project. Products, prices, scores, and coverage overlays are demonstration data, not commercial offers or engineering measurements. There is no affiliation with a furniture manufacturer.
 
----
+## Features
 
-## Tech Stack
+- Grid-snapped walls, doors, windows, room labels, furniture placement, and drawing undo
+- Starter room templates and a built-in demo that needs no API key
+- Touch controls, mobile panel navigation, and an isometric PNG export
+- A browser-local draft that survives reloads and reopening the browser
+- A fictional 13-item catalog, cart, and downloadable demo summary (no payments or orders)
+- Shareable proposals saved by the local backend
+- Optional AI suggestions; provider integration is experimental and separate from the drawing tools
 
-| Layer      | Technology                              |
-| ---------- | --------------------------------------- |
-| Frontend   | Next.js 14 (App Router) + TailwindCSS  |
-| Backend    | Python FastAPI                          |
-| AI Engine  | Microsoft Foundry                       |
-| 2D Canvas  | Konva.js + react-konva                  |
-| State      | Zustand (sessionStorage persist)        |
-| Share Link | nanoid unique proposal URLs             |
+## Quick start
 
----
+Requires Node.js 22 LTS and Python 3.10 or later. Clone your fork, then run these commands from the repository root.
 
-## Quick Start
+### Backend
 
-### Prerequisites
-
-- **Node.js** >= 18
-- **Python** >= 3.10
-- **npm** or **yarn**
-
-### 1. Clone & Configure
-
-```bash
-# Copy and edit the .env file in the project root
-cp .env.example .env
-# Fill in your Foundry credentials:
-# FOUNDRY_ENDPOINT=<your endpoint>
-# FOUNDRY_API_KEY=<your api key>
+```sh
+python -m venv .venv
+# macOS/Linux:
+source .venv/bin/activate
+# Windows PowerShell instead:
+# .\.venv\Scripts\Activate.ps1
+python -m pip install -r backend/requirements.txt
+python -m uvicorn main:app --app-dir backend --reload --host 127.0.0.1 --port 8000
 ```
 
-### 2. Start Backend
+If PowerShell blocks activation, use `.\.venv\Scripts\python.exe` in place of `python`.
 
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-```
+### Frontend (second terminal)
 
-The API will be available at `http://localhost:8000`.
-API docs at `http://localhost:8000/docs`.
-
-### 3. Start Frontend
-
-```bash
+```sh
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`.
+On Windows, use `npm.cmd` if PowerShell blocks `npm`. Open http://localhost:3000 and choose **Cuba Demo**. Backend API documentation is at http://localhost:8000/docs. Drawing and the built-in demo work without the backend; suggestions and shared links require it.
 
----
+### Optional configuration
 
-## Project Structure
+Copy `.env.example` to `.env` in the repository root for backend settings. Leave API keys empty to use demonstration suggestions. The existing DeepSeek and Azure integrations are optional and have not been validated against live providers as part of the OSS preparation.
 
-```
-/
-├── .env                         # Environment variables
-├── README.md
-├── frontend/                    # Next.js app
-│   ├── app/
-│   │   ├── page.tsx             # Screen 1: Upload
-│   │   ├── processing/page.tsx  # Screen 2: AI Processing
-│   │   ├── layout/page.tsx      # Screen 3: 2D Canvas
-│   │   ├── shop/page.tsx        # Screen 4: Shop the Look
-│   │   └── proposal/[id]/page.tsx  # Shared proposal (read-only)
-│   ├── components/
-│   │   ├── UploadZone.tsx
-│   │   ├── ProcessingAnimation.tsx
-│   │   ├── FloorCanvas.tsx      # Konva canvas
-│   │   ├── FurniturePanel.tsx
-│   │   ├── SmartAnnotations.tsx
-│   │   ├── ShopBundle.tsx
-│   │   └── ScoreCard.tsx
-│   └── lib/
-│       ├── foundry.ts           # API client
-│       └── store.ts             # Zustand state management
-│
-├── backend/                     # FastAPI
-│   ├── main.py
-│   ├── routers/
-│   │   ├── analyze.py           # POST /api/analyze-floorplan
-│   │   ├── layout.py            # POST /api/generate-layout
-│   │   └── proposal.py          # POST /api/proposal, GET /api/proposal/{id}
-│   ├── services/
-│   │   ├── foundry_service.py   # Microsoft Foundry integration
-│   │   ├── placement_engine.py  # Smart placement rules
-│   │   └── product_catalog.py   # Product data access
-│   ├── models/
-│   │   └── schemas.py           # Pydantic models
-│   └── data/
-│       └── products.json        # Chin Hin product catalog
+For a different backend address, copy `frontend/.env.example` to `frontend/.env.local`. Restart the frontend after changing it; production rewrites are set at build time.
+
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `DEEPSEEK_API_KEY` | root `.env` | Optional furniture-suggestion provider key |
+| `DEEPSEEK_MODEL` | root `.env` | Model identifier for the existing integration |
+| `AZURE_OPENAI_ENDPOINT` | root `.env` | Optional legacy image-analysis endpoint |
+| `AZURE_OPENAI_API_KEY` | root `.env` | Optional image-analysis key |
+| `AZURE_OPENAI_DEPLOYMENT` | root `.env` | Image-analysis deployment |
+| `CORS_ORIGINS` | root `.env` | Comma-separated permitted frontend origins |
+| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | Backend address used by Next.js rewrites |
+
+## Validation
+
+```sh
+python -m pytest backend/tests -q
+cd frontend
+npm run lint
+npm run build
 ```
 
----
+GitHub Actions runs these checks on pushes and pull requests. For a production preview, run `npm start` after building and keep the backend running.
 
-## Screens
+## Project layout
 
-### Screen 1 - Upload
-Upload a floor plan image or PDF. The AI analyzes room boundaries and zones.
+- `frontend/app`: landing page, editor, catalog, demo summary, shared proposal
+- `frontend/components`: drawing canvas, isometric viewer, controls and product illustrations
+- `frontend/lib`: Zustand store, templates, demo data, API client
+- `backend/data/products.json`: fictional product catalog
+- `backend/routers`: suggestions, proposals, legacy image analysis and layout API
+- `backend/tests`: backend regression tests
 
-### Screen 2 - AI Processing
-Animated step-by-step processing view while the Foundry API analyzes the image.
+## Data and limitations
 
-### Screen 3 - 2D Layout Canvas
-Interactive Konva.js canvas with:
-- Drag-and-drop furniture placement
-- Smart annotation badges (WiFi, Airflow, Traffic Flow)
-- Room selector tabs
-- Score badge
-- Smart Optimization sidebar
+The current draft and cart live in browser localStorage, on this device and origin only. Starting a new plan or loading a template replaces the draft. Clearing browser data removes it. This release uses new fictional SKUs and does not migrate older demo drafts.
 
-### Screen 4 - Shop the Look
-Product listing with pricing, bundle discounts, add-to-cart, and share proposal link.
+Proposals are stored in `backend/data/proposals.json`; uploaded files are under `backend/uploads/`. Both are excluded from Git. A share link works only while the backend and frontend hosting it are reachable. Anyone with the link can view the proposal. The server has no user accounts or access controls; see [SECURITY.md](SECURITY.md) before hosting publicly.
 
-### Shared Proposal
-Read-only view of a design proposal accessible via unique nanoid URL.
+The isometric view is a stylized visualization, not a CAD model. Distances, WiFi, airflow, and scores are illustrative. Checkout only generates a local demo summary; it sends no email, takes no payment, and creates no real order.
 
----
+## Contributing and license
 
-## API Endpoints
+See [CONTRIBUTING.md](CONTRIBUTING.md). Code and original project illustrations are available under the [MIT license](LICENSE). Dependencies retain their own licenses. Fictional labels are project examples, not a claim of trademark availability.
 
-| Method | Endpoint                  | Description                        |
-| ------ | ------------------------- | ---------------------------------- |
-| POST   | `/api/analyze-floorplan`  | Upload & analyze floor plan image  |
-| POST   | `/api/generate-layout`    | Generate layout from room analysis |
-| POST   | `/api/proposal`           | Save proposal, get shareable link  |
-| GET    | `/api/proposal/{id}`      | Retrieve saved proposal            |
-| GET    | `/health`                 | Health check                       |
+## Prepare a clean GitHub source release
 
----
+```sh
+python scripts/package_release.py
+```
 
-## Design System
-
-- **Primary:** Navy `#1B2B6B`
-- **Accent:** Orange `#F97316`
-- **Background:** `#F8F9FF`
-- **Dark cards:** `#0F1729`
-- **Display font:** DM Serif Display
-- **Body font:** DM Sans
-- **Card radius:** 12px
-- **Button radius:** 8px
-
----
-
-## Environment Variables
-
-| Variable             | Description                     |
-| -------------------- | ------------------------------- |
-| `FOUNDRY_ENDPOINT`   | Microsoft Foundry API endpoint  |
-| `FOUNDRY_API_KEY`    | Microsoft Foundry API key       |
-| `NEXT_PUBLIC_API_URL`| Backend URL (default: localhost:8000) |
-
-If Foundry credentials are not set, the app falls back to rule-based mock analysis.
-
----
-
-## License
-
-© 2026 Chin Hin Group Berhad. All rights reserved.
+This creates `dist/ruma-studio-source.zip` with source and documentation only. It excludes environment secrets, uploads, proposals, dependencies, build output, and Git history. Extract it into a new directory and initialize a new Git repository for a fresh OSS release. The existing development repository history is not rewritten by this script.

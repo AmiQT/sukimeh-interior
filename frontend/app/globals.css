@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display&display=swap');
+
 
 :root {
   --navy: #1B2B6B;
@@ -12,13 +12,13 @@
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: Arial, sans-serif;
   background: var(--background);
   color: #1a1a1a;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'DM Serif Display', serif;
+  font-family: Georgia, serif;
 }
 
 @layer utilities {
@@ -32,6 +32,14 @@ h1, h2, h3, h4, h5, h6 {
 
   .animate-pulse-slow {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
@@ -67,3 +75,6 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #8a96e8;
 }
+
+:focus-visible { outline: 3px solid #F97316; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }

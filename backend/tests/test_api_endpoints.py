@@ -15,7 +15,7 @@ class TestRootEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "running"
-        assert "Sukimeh" in data["message"]
+        assert "Ruma Studio" in data["message"]
 
     def test_health_endpoint(self, test_client):
         response = test_client.get("/health")

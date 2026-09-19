@@ -1,25 +1,22 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Sparkles,
-  Package,
-  ArrowRight,
-  Shield,
-  Wind,
-  Footprints,
-} from "lucide-react";
+import { Sparkles, ArrowRight, Shield, Wind, Footprints } from "lucide-react";
+
+import ProductArt from "@/components/ProductArt";
+import PlanPreview from "@/components/PlanPreview";
+import type { FloorPlan } from "@/lib/store";
 import ScoreCard from "@/components/ScoreCard";
 import { getProposal } from "@/lib/foundry";
 
 interface ProposalData {
   id: string;
   layout: {
+    floorPlan?: FloorPlan;
     layout_id: string;
     score: number;
-    rooms: any[];
-    furniture_placements: any[];
     smart_optimizations: { type: string; title: string; desc: string }[];
     bundle: {
       products: {
@@ -65,7 +62,7 @@ export default function ProposalPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-navy-400 font-medium">Loading proposal...</p>
+          <p className="text-navy-400 font-medium">Memuatkan proposal...</p>
         </div>
       </div>
     );
@@ -77,16 +74,16 @@ export default function ProposalPage() {
         <div className="text-center max-w-md">
           <div className="text-5xl mb-4">🔍</div>
           <h2 className="text-2xl font-display text-navy mb-2">
-            Proposal Not Found
+            Proposal tidak ditemui
           </h2>
           <p className="text-gray-500 mb-6">
-            This proposal link may have expired or doesn&apos;t exist.
+            Pautan ini tidak tersedia. Semak pautan dan pastikan pelayan masih berjalan.
           </p>
           <button
             onClick={() => router.push("/")}
             className="bg-accent hover:bg-accent-500 text-white font-semibold px-6 py-3 rounded-btn transition-colors"
           >
-            Get Your Own Design
+            Cipta pelan anda
           </button>
         </div>
       </div>
@@ -96,9 +93,9 @@ export default function ProposalPage() {
   const { layout } = proposal;
   const savings = layout.bundle.total_original - layout.bundle.total_discounted;
   const tags = [
-    { label: "100% Coverage", icon: Shield },
-    { label: "Airflow Optimized", icon: Wind },
-    { label: "Traffic Flow Clear", icon: Footprints },
+    { label: "Ilustrasi WiFi", icon: Shield },
+    { label: "Idea pengudaraan", icon: Wind },
+    { label: "Cadangan laluan", icon: Footprints },
   ];
 
   return (
@@ -112,9 +109,9 @@ export default function ProposalPage() {
             </div>
             <div>
               <h1 className="text-base font-display">
-                Sukimeh AI Interior Designer
+                Ruma Studio
               </h1>
-              <p className="text-xs text-navy-200">Shared Proposal</p>
+              <p className="text-xs text-navy-200">Proposal dikongsi</p>
             </div>
           </div>
         </div>
@@ -125,8 +122,8 @@ export default function ProposalPage() {
         <div className="bg-dark rounded-card overflow-hidden shadow-card mb-8">
           <div className="flex flex-col md:flex-row">
             <div className="md:w-1/2">
-              {proposal.image_url ? (
-                <img
+              {layout.floorPlan ? <PlanPreview plan={layout.floorPlan} /> : proposal.image_url ? (
+                <Image unoptimized width={800} height={560}
                   src={proposal.image_url}
                   alt="Room layout"
                   className="w-full h-64 md:h-80 object-contain bg-navy-800"
@@ -140,14 +137,13 @@ export default function ProposalPage() {
 
             <div className="md:w-1/2 p-6 flex flex-col justify-center">
               <div className="flex items-center gap-4 mb-4">
-                <ScoreCard score={layout.score} />
+                {!layout.layout_id.startsWith("manual-") && <ScoreCard score={layout.score} />}
                 <div>
                   <h2 className="text-2xl font-display text-white">
-                    AI-Designed Space
+                    Cadangan ruang
                   </h2>
                   <p className="text-navy-200 text-sm mt-1">
-                    {layout.rooms.length} rooms •{" "}
-                    {layout.furniture_placements.length} items
+                    {layout.bundle.products.length} perabot dipilih
                   </p>
                 </div>
               </div>
@@ -169,8 +165,8 @@ export default function ProposalPage() {
         {/* Products */}
         <div className="space-y-3 mb-8">
           <h3 className="font-display text-xl text-navy-500 flex items-center gap-2">
-            <Package className="w-5 h-5 text-accent" />
-            Included in this Design
+            <span>📦</span>
+            Pilihan perabot
           </h3>
 
           {layout.bundle.products.map((product) => (
@@ -178,8 +174,8 @@ export default function ProposalPage() {
               key={product.id}
               className="flex items-center gap-4 bg-white rounded-card p-4 border border-navy-100 shadow-sm"
             >
-              <div className="w-16 h-16 rounded-lg bg-navy-50 flex items-center justify-center flex-shrink-0">
-                <Package className="w-6 h-6 text-navy-300" />
+              <div className="w-16 h-16 rounded-lg bg-navy-50 flex items-center justify-center flex-shrink-0 text-3xl">
+                <ProductArt sku={product.sku || product.id} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-navy-500">
@@ -207,7 +203,7 @@ export default function ProposalPage() {
         <div className="bg-white rounded-card p-6 border border-navy-100 shadow-card mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Bundle Price</p>
+              <p className="text-sm text-gray-500">Jumlah pakej demo</p>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-3xl font-bold text-navy-500">
                   RM {layout.bundle.total_discounted.toLocaleString()}
@@ -217,7 +213,7 @@ export default function ProposalPage() {
                 </span>
               </div>
               <p className="text-sm text-green-600 font-medium mt-1">
-                Save RM {savings.toLocaleString()}
+                Jimat RM {savings.toLocaleString()}
               </p>
             </div>
           </div>
@@ -229,14 +225,14 @@ export default function ProposalPage() {
             onClick={() => router.push("/")}
             className="bg-accent hover:bg-accent-500 text-white font-semibold px-8 py-4 rounded-btn transition-colors inline-flex items-center gap-2 shadow-card"
           >
-            Get Your Own Design
+            Cipta pelan anda
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
       </main>
 
       <footer className="py-6 text-center text-xs text-gray-400 border-t border-navy-50 mt-8">
-        © 2026 Chin Hin Group Berhad. Powered by Microsoft Foundry AI.
+        © 2026 Ruma Studio contributors. Katalog dan harga rekaan.
       </footer>
     </div>
   );
