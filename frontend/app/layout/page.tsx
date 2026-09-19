@@ -277,7 +277,12 @@ export default function LayoutPage() {
           {/* Tab: Furniture */}
           {sidebarTab === "furniture" && (
             <div className="flex-1 overflow-hidden flex flex-col">
-              <FurnitureSidebar onItemAdded={() => setMobileView("canvas")} />
+              <FurnitureSidebar
+                onItemAdded={() => {
+                  setTool("select");
+                  setMobileView("canvas");
+                }}
+              />
             </div>
           )}
 

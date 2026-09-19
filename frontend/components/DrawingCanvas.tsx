@@ -115,6 +115,17 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
         eraseEl(selected);
         setSelected(null);
       }
+      if (selected?.type === "furniture" && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+        const furn = floorPlan.furniture.find((f) => f.id === selected.id);
+        if (furn) {
+          snapshot();
+          const step = e.shiftKey ? GRID * 2 : GRID;
+          const dx = e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+          const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+          updateFurniturePosition(furn.id, Math.max(0, furn.x + dx), Math.max(0, furn.y + dy));
+        }
+      }
       if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         undo();
@@ -180,6 +191,10 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
   };
 
   const handleMouseMove = () => {
+    if (tool !== "wall" || !wallStart) {
+      if (snappedEndpoint) setSnappedEndpoint(null);
+      return;
+    }
     const raw = stageRef.current?.getRelativePointerPosition();
     if (!raw) return;
     const gridSnapped = { x: snap(raw.x), y: snap(raw.y) };
@@ -189,6 +204,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
   };
 
   const handleTouchMove = (e: Konva.KonvaEventObject<TouchEvent>) => {
+    if (tool !== "wall" || !wallStart) return;
     e.evt.preventDefault();
     const touch = e.evt.touches[0];
     if (!touch || !containerRef.current) return;
@@ -430,6 +446,14 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
         x={furn.x}
         y={furn.y}
         draggable
+        onMouseEnter={() => {
+          const container = stageRef.current?.container();
+          if (container && tool !== "eraser") container.style.cursor = "grab";
+        }}
+        onMouseLeave={() => {
+          const container = stageRef.current?.container();
+          if (container) container.style.cursor = tool === "eraser" || tool === "wall" ? "crosshair" : "default";
+        }}
         onClick={(e) => {
           e.cancelBubble = true;
           tool === "eraser" ? (snapshot(), removeFurniture(furn.id)) : setSelected({ type: "furniture", id: furn.id });
@@ -438,8 +462,14 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
           e.cancelBubble = true;
           tool === "eraser" ? (snapshot(), removeFurniture(furn.id)) : setSelected({ type: "furniture", id: furn.id });
         }}
-        onDragStart={() => snapshot()}
+        onDragStart={() => {
+          snapshot();
+          const container = stageRef.current?.container();
+          if (container) container.style.cursor = "grabbing";
+        }}
         onDragEnd={(e) => {
+          const container = stageRef.current?.container();
+          if (container) container.style.cursor = "grab";
           const nx = snap(e.target.x());
           const ny = snap(e.target.y());
           updateFurniturePosition(furn.id, nx, ny);
@@ -451,11 +481,20 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
           radius={22}
           fill={isSel ? "#1B2B6B" : "#ffffff"}
           stroke={isSel ? "#F97316" : "#1B2B6B"}
-          strokeWidth={2}
-          shadowBlur={isSel ? 10 : 5}
-          shadowColor="rgba(27,43,107,0.25)"
+          strokeWidth={isSel ? 3 : 2}
+          shadowBlur={isSel ? 12 : 5}
+          shadowColor={isSel ? "rgba(249,115,22,0.35)" : "rgba(27,43,107,0.25)"}
           shadowOffsetY={2}
         />
+        {isSel && (
+          <Circle
+            radius={28}
+            stroke="#F97316"
+            strokeWidth={1.5}
+            dash={[4, 4]}
+            listening={false}
+          />
+        )}
         <Text x={-12} y={-13} text={furn.icon} fontSize={20} align="center" />
         <Text
           x={-32}
@@ -761,8 +800,12 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
         </div>
       )}
       {tool === "select" && selected && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-navy/90 text-white text-[11px] sm:text-xs px-3 py-1.5 rounded-full pointer-events-none shadow-md max-w-[92vw] truncate text-center z-20">
-          {selected.type === "door" || selected.type === "window" ? "Tekan lagi untuk putar · Del padam" : "Tekan Padam (✕) untuk padam"}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-navy/90 text-white text-[11px] sm:text-xs px-3.5 py-1.5 rounded-full pointer-events-none shadow-md max-w-[92vw] truncate text-center z-20">
+          {selected.type === "furniture"
+            ? "🖱️ Seret tetikus atau guna kekunci anak panah (← ↑ → ↓) untuk gerakkan · Del padam"
+            : selected.type === "door" || selected.type === "window"
+            ? "Tekan lagi untuk putar · Del padam"
+            : "Tekan Padam (✕) untuk padam"}
         </div>
       )}
     </div>
