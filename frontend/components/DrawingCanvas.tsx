@@ -456,14 +456,23 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
         }}
         onClick={(e) => {
           e.cancelBubble = true;
-          tool === "eraser" ? (snapshot(), removeFurniture(furn.id)) : setSelected({ type: "furniture", id: furn.id });
+          if (tool === "eraser") {
+            snapshot();
+            removeFurniture(furn.id);
+          } else {
+            setSelected({ type: "furniture", id: furn.id });
+          }
         }}
         onTap={(e) => {
           e.cancelBubble = true;
-          tool === "eraser" ? (snapshot(), removeFurniture(furn.id)) : setSelected({ type: "furniture", id: furn.id });
+          if (tool === "eraser") {
+            snapshot();
+            removeFurniture(furn.id);
+          } else {
+            setSelected({ type: "furniture", id: furn.id });
+          }
         }}
         onDragStart={() => {
-          snapshot();
           const container = stageRef.current?.container();
           if (container) container.style.cursor = "grabbing";
         }}
@@ -472,9 +481,12 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
           if (container) container.style.cursor = "grab";
           const nx = snap(e.target.x());
           const ny = snap(e.target.y());
-          updateFurniturePosition(furn.id, nx, ny);
           e.target.x(nx);
           e.target.y(ny);
+          if (nx !== furn.x || ny !== furn.y) {
+            snapshot();
+            updateFurniturePosition(furn.id, nx, ny);
+          }
         }}
       >
         <Circle
@@ -495,7 +507,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
             listening={false}
           />
         )}
-        <Text x={-12} y={-13} text={furn.icon} fontSize={20} align="center" />
+        <Text x={-12} y={-13} text={furn.icon} fontSize={20} align="center" listening={false} />
         <Text
           x={-32}
           y={27}
@@ -505,9 +517,10 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
           fill={isSel ? "#F97316" : "#1B2B6B"}
           fontStyle="bold"
           align="center"
+          listening={false}
         />
         {furn.annotation && (
-          <Group x={20} y={-28}>
+          <Group x={20} y={-28} listening={false}>
             <Rect x={0} y={0} width={Math.min(furn.annotation.length * 5.5, 100) + 12} height={18} cornerRadius={9} fill="#10B981" />
             <Text x={6} y={4} text={`✓ ${furn.annotation.slice(0, 18)}`} fontSize={8} fill="white" fontStyle="bold" />
           </Group>
@@ -515,6 +528,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
       </Group>
     );
   };
+
 
   // ── Render ──────────────────────────────────────────────────────────────────
   const gridCols = Math.ceil(worldWidth / GRID);
@@ -601,7 +615,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
           onTap={handlePlace}
           onDblClick={handleDblClick}
         >
-          {/* Grid */}
+          {/* 1. Background Grid & Simulation Overlays (listening={false}) */}
           <Layer listening={false}>
             <Rect width={worldWidth} height={worldHeight} fill="#F8F9FF" />
             {Array.from({ length: gridCols }).map((_, i) => (
@@ -620,10 +634,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
                 strokeWidth={i % 5 === 0 ? 1 : 0.5}
               />
             ))}
-          </Layer>
 
-          {/* SIMULATION OVERLAYS (Bottom Layer) */}
-          <Layer listening={false}>
             {/* WiFi Coverage Heatmap Rings */}
             {showWifiHeatmap &&
               wifiRouters.map((router) => (
@@ -635,7 +646,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
                 </Group>
               ))}
 
-            {/* Airflow Vector Streams (From windows to fans/hoods) */}
+            {/* Airflow Vector Streams */}
             {showAirflow &&
               windows.map((win) => {
                 const nearestFan = fansOrHoods[0];
@@ -657,7 +668,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
                 );
               })}
 
-            {/* Traffic Clearance Paths (From doors into rooms) */}
+            {/* Traffic Clearance Paths */}
             {showTrafficFlow &&
               floorPlan.doors.map((door) => (
                 <Group key={`traffic-${door.id}`}>
@@ -668,8 +679,9 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
               ))}
           </Layer>
 
-          {/* Walls */}
+          {/* 2. Interactive Floor Plan & Furniture Layer */}
           <Layer>
+            {/* Walls */}
             {floorPlan.walls.map((w) => (
               <WallEl key={w.id} wall={w} />
             ))}
@@ -700,7 +712,7 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
                 />
               </>
             )}
-            {/* Snap indicator — green highlight when near endpoint */}
+            {/* Snap indicator */}
             {tool === "wall" && snappedEndpoint && (
               <Circle
                 x={snappedEndpoint.x}
@@ -712,27 +724,21 @@ export default function DrawingCanvas({ tool, onDrawingStateChange }: Props) {
                 listening={false}
               />
             )}
-          </Layer>
 
-          {/* Doors & Windows */}
-          <Layer>
+            {/* Doors & Windows */}
             {floorPlan.doors.map((d) => (
               <DoorEl key={d.id} door={d} />
             ))}
             {floorPlan.windows.map((w) => (
               <WindowEl key={w.id} win={w} />
             ))}
-          </Layer>
 
-          {/* Room Labels */}
-          <Layer>
+            {/* Room Labels */}
             {floorPlan.roomLabels.map((l) => (
               <RoomLabelEl key={l.id} label={l} />
             ))}
-          </Layer>
 
-          {/* Furniture */}
-          <Layer>
+            {/* Furniture (Rendered at top for smooth dragging) */}
             {floorPlan.furniture.map((f) => (
               <FurnitureEl key={f.id} furn={f} />
             ))}
